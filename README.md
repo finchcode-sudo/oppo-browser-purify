@@ -49,9 +49,7 @@
 ### 搜索引擎替换
 
 - 设置页搜索引擎仅保留 Bing、Google、百度
-- 保持用户选择的搜索引擎，避免被服务端配置覆盖
 - 将搜索结果页顶部频道替换为百度、Bing、Google
-- 根据顶部频道使用对应搜索引擎生成搜索地址
 
 ### 通用功能
 
@@ -91,7 +89,7 @@ gradle :app:assembleDebug
 - [Android SDK](https://developer.android.com/studio)：用于 Android 编译和 APK 构建
 - [Gradle](https://gradle.org/) 与 Android Gradle Plugin：用于项目构建
 
-第三方项目的许可证和版权归原作者所有。使用和再分发第三方依赖时，请遵守其许可证要求。
+第三方项目的许可证和版权归原作者所有。
 
 ## 免责声明
 
