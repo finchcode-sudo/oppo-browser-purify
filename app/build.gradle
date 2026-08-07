@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.heytap.purify'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.heytap.purify"
+        minSdk 29
+        targetSdk 34
+        versionCode 100
+        versionName "1.0.0"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../keystore.jks')
+            storePassword findProperty('RELEASE_STORE_PASSWORD') ?: System.getenv('RELEASE_STORE_PASSWORD')
+            keyAlias findProperty('RELEASE_KEY_ALIAS') ?: System.getenv('RELEASE_KEY_ALIAS')
+            keyPassword findProperty('RELEASE_KEY_PASSWORD') ?: System.getenv('RELEASE_KEY_PASSWORD')
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packaging {
+        resources.excludes += [
+            'META-INF/AL2.0',
+            'META-INF/LGPL2.1',
+            'META-INF/DEPENDENCIES',
+            'META-INF/LICENSE*',
+            'META-INF/NOTICE*'
+        ]
+    }
+}
+
+dependencies {
+    // legacy Xposed API 82：框架运行时提供，仅编译期引用，不打包
+    compileOnly files('libs/api-82.jar')
+
+    // 真正的 Material 3 库（含 DynamicColors 莫奈取色）
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.core:core:1.13.1'
+}
