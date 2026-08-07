@@ -1,0 +1,13 @@
+*.jks
+*.keystore
+private.pem
+
+local.properties
+
+out/
+D:/AndroidBuildTemp/
+/build
+app/build/
+
+.idea/
+*.iml
