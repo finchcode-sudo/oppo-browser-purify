@@ -226,10 +226,6 @@ public final class PureSearchPurifyHook {
                                     return;
                                 }
                                 String targetKey = order.get(index);
-                                if (targetKey.equals(currentKey)) {
-                                    // 该 Tab 本身就是当前默认引擎，原生逻辑已经能生成正确的 URL，无需覆盖
-                                    return;
-                                }
                                 String query = (String) param.args[1];
                                 Class<?> helperCls = XposedHelpers.findClass(HELPER_CLS, classLoader);
                                 Object helper = XposedHelpers.getStaticObjectField(helperCls, "a");
