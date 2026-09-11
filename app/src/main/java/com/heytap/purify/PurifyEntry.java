@@ -6,6 +6,7 @@ import com.heytap.purify.hooks.BottomTabPurifyHook;
 import com.heytap.purify.hooks.DownloadManagerPurifyHook;
 import com.heytap.purify.hooks.MyProfilePurifyHook;
 import com.heytap.purify.hooks.PureSearchPurifyHook;
+import com.heytap.purify.hooks.SpeedUpHook;
 import com.heytap.purify.hooks.HookPrefs;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -34,6 +35,7 @@ public class PurifyEntry implements IXposedHookLoadPackage {
         install("AiVisionPurifyHook", () -> AiVisionPurifyHook.install(lpparam.classLoader));
         install("AdBlockPurifyHook", () -> AdBlockPurifyHook.install(lpparam.classLoader));
         install("PureSearchPurifyHook", () -> PureSearchPurifyHook.install(lpparam.classLoader));
+        install("SpeedUpHook", () -> SpeedUpHook.install(lpparam.classLoader));
     }
 
     private static void install(String name, Runnable hook) {
