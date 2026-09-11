@@ -137,12 +137,19 @@ public final class PureSearchPurifyHook {
                                 Object engineInst = XposedHelpers.callMethod(companion, "b");
                                 List<Object> engines = buildEngines(classLoader, engineInst);
 
+                                String currentKey = getCurrentEngineKey(engineInst);
+                                List<String> order = orderedEngineKeys(currentKey);
+
                                 List<Object> newList = new ArrayList<>(3);
-                                if (engines.size() >= 3) {
-                                    newList.add(engines.get(2));
-                                    newList.add(engines.get(0));
-                                    newList.add(engines.get(1));
-                                } else {
+                                for (String key : order) {
+                                    for (Object e : engines) {
+                                        if (key.equals(XposedHelpers.callMethod(e, "getKey"))) {
+                                            newList.add(e);
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (newList.isEmpty()) {
                                     newList.addAll(engines);
                                 }
 
@@ -155,6 +162,41 @@ public final class PureSearchPurifyHook {
         } catch (Throwable t) {
             XposedBridge.log("顶部频道替换 hook 安装失败: " + t.getMessage());
         }
+    }
+
+    /**
+     * 读取当前"默认搜索引擎"的 key（bing_ov / google / baidu）。
+     */
+    private static String getCurrentEngineKey(Object engineInst) {
+        try {
+            return (String) XposedHelpers.callMethod(engineInst, "G");
+        } catch (Throwable t) {
+            XposedBridge.log("读取当前默认引擎失败: " + t.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 把当前默认引擎排在第一位，剩余两个按固定相对顺序（bing、google、baidu）跟在后面。
+     * 这样顶部频道会跟随"默认搜索引擎"设置动态变化，而不是永远百度在前。
+     */
+    private static List<String> orderedEngineKeys(String currentKey) {
+        String[] base = {"bing_ov", "google", "baidu"};
+        List<String> order = new ArrayList<>(3);
+        if (currentKey != null) {
+            for (String key : base) {
+                if (key.equals(currentKey)) {
+                    order.add(key);
+                    break;
+                }
+            }
+        }
+        for (String key : base) {
+            if (!order.contains(key)) {
+                order.add(key);
+            }
+        }
+        return order;
     }
 
 
@@ -173,22 +215,22 @@ public final class PureSearchPurifyHook {
 
                                 Object entity = XposedHelpers.getObjectField(self, "b");
                                 int index = (Integer) XposedHelpers.callMethod(entity, "getIndex");
-                                String targetKey;
-                                switch (index) {
-                                    case 1:
-                                        targetKey = "bing_ov";
-                                        break;
-                                    case 2:
-                                        targetKey = "google";
-                                        break;
-                                    default:
-                                        return;
-                                }
-                                String query = (String) param.args[1];
 
                                 Class<?> enginesCls = XposedHelpers.findClass(ENGINES_CLS, classLoader);
                                 Object companion = XposedHelpers.getStaticObjectField(enginesCls, "p");
                                 Object engineInst = XposedHelpers.callMethod(companion, "b");
+
+                                String currentKey = getCurrentEngineKey(engineInst);
+                                List<String> order = orderedEngineKeys(currentKey);
+                                if (index < 0 || index >= order.size()) {
+                                    return;
+                                }
+                                String targetKey = order.get(index);
+                                if (targetKey.equals(currentKey)) {
+                                    // 该 Tab 本身就是当前默认引擎，原生逻辑已经能生成正确的 URL，无需覆盖
+                                    return;
+                                }
+                                String query = (String) param.args[1];
                                 Class<?> helperCls = XposedHelpers.findClass(HELPER_CLS, classLoader);
                                 Object helper = XposedHelpers.getStaticObjectField(helperCls, "a");
                                 Object e = XposedHelpers.callMethod(helper, "c", targetKey);
